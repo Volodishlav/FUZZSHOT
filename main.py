@@ -16,7 +16,6 @@ def parse_length(val):
         n = int(val)
         return lambda: n
 
-    # Expresión tipo "<=6&>2" — parsear condiciones
     conditions = []
     for part in val.split('&'):
         part = part.strip()
@@ -26,7 +25,6 @@ def parse_length(val):
         op, num = m.group(1), int(m.group(2))
         conditions.append((op, num))
 
-    # Determinar rango válido
     lo, hi = 1, 256
     for op, num in conditions:
         if op == '>':   lo = max(lo, num + 1)
@@ -40,16 +38,14 @@ def parse_length(val):
 
     return lambda: random.randint(lo, hi)
 
-# ── Charset según modo ────────────────────────────────────────────────────
-
 MODOS = {
     'alpha':       string.ascii_letters,
     'lower':       string.ascii_lowercase,
     'upper':       string.ascii_uppercase,
-    'num':      string.digits,
+    'num':         string.digits,
     'alnum':       string.ascii_letters + string.digits,
-    'lower+num': string.ascii_lowercase + string.digits,
-    'upper+num': string.ascii_uppercase + string.digits,
+    'lower+num':   string.ascii_lowercase + string.digits,
+    'upper+num':   string.ascii_uppercase + string.digits,
     'hex':         '0123456789abcdef',
     'HEX':         '0123456789ABCDEF',
     'punct':       string.punctuation,
@@ -60,7 +56,6 @@ MODOS = {
 def get_charset(mode):
     if mode in MODOS:
         return MODOS[mode]
-    # Permitir combinaciones con '+': ej. "lower+digits+punct"
     charset = ''
     for part in mode.split('+'):
         if part in MODOS:
