@@ -1,5 +1,5 @@
 # FUZZSHOT
-A fast URL fuzzer with automated screenshot capture. This is a powerful CLI tool designed for dynamic URL generation and fuzzing. It allows the construction of customizable URL structures using lots of parameters, making it ideal for automation and testing workflows.
+A powerful CLI tool designed for dynamic URL generation and fuzzing with automated screenshot capture. It allows the construction of customizable URL structures using lots of parameters, making it ideal for automation and testing workflows.
 
 ## Features
 - Highly Configurable: Full control over prefixes, suffixes, and length.
