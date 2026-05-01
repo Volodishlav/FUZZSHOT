@@ -154,7 +154,7 @@ def run_wordlist_mode(prefix, suffix, words, count, out_dir):
                     break
 
         except KeyboardInterrupt:
-            print("\n⏹  Interrupted by user")
+            print("\n  Interrupted by user")
         finally:
             browser.close()
 
@@ -164,7 +164,7 @@ def run_gen_mode(prefix, suffix, length_fn, charset, count, out_dir):
     infinite = (count == 0)
     label    = "∞" if infinite else str(count)
 
-    print(f"\n🔀  Generation mode")
+    print(f"\n  Generation mode")
     print(f"    Prefix      : {prefix!r}")
     print(f"    Suffix      : {suffix!r}")
     print(f"    Charset     : {len(charset)} chars")
@@ -187,7 +187,7 @@ def run_gen_mode(prefix, suffix, length_fn, charset, count, out_dir):
                 screenshot(page, url, out_dir, fname)
                 i += 1
         except KeyboardInterrupt:
-            print("\n⏹  Interrupted by user.")
+            print("\n  Interrupted by user.")
         finally:
             browser.close()
 
