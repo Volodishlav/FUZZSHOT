@@ -9,13 +9,6 @@ from itertools import product
 from playwright.sync_api import sync_playwright
 
 def parse_length(val):
-    """
-    Parsea el flag -l. Puede ser:
-      - Un número entero fijo: "5"
-      - Una expresión con condiciones: "<=6&>2"
-    Devuelve una función que genera una longitud válida aleatoria,
-    o siempre el mismo número si es fijo.
-    """
     val = val.strip()
 
     # Número fijo
@@ -29,7 +22,7 @@ def parse_length(val):
         part = part.strip()
         m = re.match(r'^([<>]=?|==)(\d+)$', part)
         if not m:
-            raise ValueError(f"Condición de longitud no reconocida: '{part}'")
+            raise ValueError(f"Error: unrecognized length condition: '{part}'")
         op, num = m.group(1), int(m.group(2))
         conditions.append((op, num))
 
@@ -43,7 +36,7 @@ def parse_length(val):
         elif op == '==': lo = hi = num
 
     if lo > hi:
-        raise ValueError(f"Condiciones de longitud imposibles: rango [{lo}, {hi}]")
+        raise ValueError(f"Error: length conditions: range [{lo}, {hi}]")
 
     return lambda: random.randint(lo, hi)
 
@@ -74,20 +67,19 @@ def get_charset(mode):
             charset += MODOS[part]
         else:
             raise ValueError(
-                f"Modo '{part}' no reconocido.\n"
-                f"Modos disponibles: {', '.join(MODOS.keys())}"
+                f"Error: Mode '{part}' not recognized.\n"
+                f"Available modes: {', '.join(MODOS.keys())}"
             )
     return ''.join(sorted(set(charset)))
 
 def load_wordlist(filepath):
-    """Carga un .txt y devuelve lista de palabras (una por línea, sin blancos)."""
     if not os.path.isfile(filepath):
-        print(f"Error: no se encontró la wordlist '{filepath}'", file=sys.stderr)
+        print(f"Error: wordlist not found: '{filepath}'", file=sys.stderr)
         sys.exit(1)
     with open(filepath, 'r', encoding='utf-8', errors='ignore') as fh:
         words = [line.strip() for line in fh if line.strip()]
     if not words:
-        print(f"Error: la wordlist '{filepath}' está vacía.", file=sys.stderr)
+        print(f"Error: wordlist '{filepath}' is empty.", file=sys.stderr)
         sys.exit(1)
     return words
 
@@ -104,18 +96,18 @@ def screenshot(page, url, out_dir, filename):
 
 def run_file_mode(filepath, out_dir):
     if not os.path.isfile(filepath):
-        print(f"Error: no se encontró el archivo '{filepath}'", file=sys.stderr)
+        print(f"Error: file not found: '{filepath}'", file=sys.stderr)
         sys.exit(1)
 
     with open(filepath, 'r', encoding='utf-8') as fh:
         urls = [line.strip() for line in fh if line.strip()]
 
     if not urls:
-        print("El archivo está vacío o no contiene URLs.", file=sys.stderr)
+        print("Error: The file is empty or does not contain URLs.", file=sys.stderr)
         sys.exit(1)
 
-    print(f"\n{len(urls)} URLs cargadas desde '{filepath}'")
-    print(f"Salida → {os.path.abspath(out_dir)}\n")
+    print(f"\n{len(urls)} loaded URLs from '{filepath}'")
+    print(f"Output → {os.path.abspath(out_dir)}\n")
     os.makedirs(out_dir, exist_ok=True)
 
     with sync_playwright() as p:
@@ -129,19 +121,19 @@ def run_file_mode(filepath, out_dir):
 
         browser.close()
 
-    print(f"\n✔  Terminado. {len(urls)} URLs procesadas.")
+    print(f"\n✔  Finished. {len(urls)} processed URLs.")
 
 def run_wordlist_mode(prefix, suffix, words, count, out_dir):
     infinite = (count == 0)
     total    = len(words)
-    label    = "∞ (bucle)" if infinite else str(min(count, total))
+    label    = "∞ (loop)" if infinite else str(min(count, total))
 
-    print(f"\n  Modo wordlist")
-    print(f"    Prefijo  : {prefix!r}")
-    print(f"    Sufijo   : {suffix!r}")
-    print(f"    Palabras : {total} en la lista")
-    print(f"    Cantidad : {label}")
-    print(f"    Salida   → {os.path.abspath(out_dir)}\n")
+    print(f"\n  Wordlist mode")
+    print(f"    Prefix      : {prefix!r}")
+    print(f"    Suffix      : {suffix!r}")
+    print(f"    Words       : {total} in the list")
+    print(f"    Iterations  : {label}")
+    print(f"    Output      : {os.path.abspath(out_dir)}\n")
     os.makedirs(out_dir, exist_ok=True)
 
     with sync_playwright() as p:
@@ -167,22 +159,22 @@ def run_wordlist_mode(prefix, suffix, words, count, out_dir):
                     break
 
         except KeyboardInterrupt:
-            print("\n⏹  Interrumpido por el usuario.")
+            print("\n⏹  Interrupted by user")
         finally:
             browser.close()
 
-    print(f"\n✔  {done} palabras procesadas.")
+    print(f"\n✔  {done} words processed.")
 
 def run_gen_mode(prefix, suffix, length_fn, charset, count, out_dir):
     infinite = (count == 0)
     label    = "∞" if infinite else str(count)
 
-    print(f"\n🔀  Modo generación")
-    print(f"    Prefijo  : {prefix!r}")
-    print(f"    Sufijo   : {suffix!r}")
-    print(f"    Charset  : {len(charset)} chars")
-    print(f"    Cantidad : {label}")
-    print(f"    Salida   → {os.path.abspath(out_dir)}\n")
+    print(f"\n🔀  Generation mode")
+    print(f"    Prefix      : {prefix!r}")
+    print(f"    Suffix      : {suffix!r}")
+    print(f"    Charset     : {len(charset)} chars")
+    print(f"    Iterations  : {label}")
+    print(f"    Output      : {os.path.abspath(out_dir)}\n")
     os.makedirs(out_dir, exist_ok=True)
 
     with sync_playwright() as p:
@@ -200,40 +192,40 @@ def run_gen_mode(prefix, suffix, length_fn, charset, count, out_dir):
                 screenshot(page, url, out_dir, fname)
                 i += 1
         except KeyboardInterrupt:
-            print("\n⏹  Interrumpido por el usuario.")
+            print("\n⏹  Interrupted by user.")
         finally:
             browser.close()
 
-    print(f"\n✔  {i} combinaciones procesadas.")
+    print(f"\n✔  {i} processed combinations.")
 
 HELP_TEXT = """
 ─────────────────────────────────────────────────────────────────────────────────────
-  -s PREFIX       Primera parte de la URL (antes de la sección variable)
-  -e SUFFIX       Segunda parte de la URL (después de la sección variable)
-  -l LENGTH       Longitud de la sección generada.
-                    Número fijo:     -l 5
-                    Con condiciones: -l "<=6&>2"  (operadores: < > <= >= ==)
-                    Se pueden encadenar con &.
-  -m MODE/FILE    Charset o ruta a wordlist:
+  -s PREFIX       Start of the URL (before the variable section)
+  -e SUFFIX       End of the URL (after the variable section)
+  -l LENGTH       Length of the generated section.
+                     Fixed number:    -l 5
+                     Conditional:     -l "<=6&>2" (operators: < > <= >= ==)
+                     Can be chained using &.
+  -m MODE         Charset or path to wordlist:
                       alpha        a-z A-Z
                       lower        a-z
                       upper        A-Z
                       num          0-9
-                      alnum        a-z A-Z 0-9  (por defecto)
+                      alnum        a-z A-Z 0-9  (default)
                       lower+num    a-z 0-9
                       upper+num    A-Z 0-9
                       hex          0-9 a-f
                       HEX          0-9 A-F
                       urlsafe      a-z A-Z 0-9 - _
-                      printable    todos los caracteres imprimibles
-                  Wordlist: pasa la ruta a un .txt (una palabra por línea).
-                      El programa probará cada palabra en orden en vez de generar
-                      combinaciones aleatorias. Con -c 0 recorre en bucle infinito.
-  -c COUNT        Número de iteraciones. 0 = infinito (Ctrl+C para parar).
-                      En modo wordlist finito se limita también al tamaño de la lista.
-  -f FILE         Ruta a un .txt con una URL/IP por línea.
-  -o DIR          Directorio de salida para las capturas (por defecto: ./)
-  -h, --help      Muestra esta ayuda.
+                      printable    all printable characters
+                  Wordlist: Provide the path to a .txt file (one word per line).
+                      The program will iterate through the list instead of 
+                      generating random combinations. Use -c 0 for infinite loop.
+  -c COUNT        Number of iterations. 0 = infinite (Ctrl+C to stop).
+                      In finite wordlist mode, it is also limited by list size.
+  -f FILE         Path to a .txt file with one URL/IP per line.
+  -o DIR          Output directory for screenshots (default: ./)
+  -h, --help      Show this help message.
 ─────────────────────────────────────────────────────────────────────────────────────
 """
 
@@ -275,17 +267,17 @@ def main():
     if args.count  is None: errors.append("-c (cantidad) es obligatorio")
     # -l solo es obligatorio en modo charset aleatorio
     if not is_wordlist and args.length is None:
-        errors.append("-l (longitud) es obligatorio en modo charset")
+        errors.append("-l (length) is mandatory in charset mode")
     if errors:
         for e in errors:
             print(f"Error: {e}", file=sys.stderr)
-        print("Usa -h para ver la ayuda.", file=sys.stderr)
+        print("Use -h for help.", file=sys.stderr)
         sys.exit(1)
 
     suffix = args.suffix if args.suffix is not None else ''
 
     if args.count < 0:
-        print("Error: -c debe ser 0 (infinito) o un número positivo.", file=sys.stderr)
+        print("Error: -c must be 0 (∞) or any other natural number (ℕ).", file=sys.stderr)
         sys.exit(1)
 
     # ── Rama wordlist ─────────────────────────────────────────────────────
@@ -304,13 +296,13 @@ def main():
     try:
         length_fn = parse_length(args.length)
     except ValueError as e:
-        print(f"Error en -l: {e}", file=sys.stderr)
+        print(f"Error in -l: {e}", file=sys.stderr)
         sys.exit(1)
 
     try:
         charset = get_charset(args.mode)
     except ValueError as e:
-        print(f"Error en -m: {e}", file=sys.stderr)
+        print(f"Error in -m: {e}", file=sys.stderr)
         sys.exit(1)
 
     run_gen_mode(
