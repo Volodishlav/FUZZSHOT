@@ -11,7 +11,6 @@ from playwright.sync_api import sync_playwright
 def parse_length(val):
     val = val.strip()
 
-    # Número fijo
     if re.match(r'^\d+$', val):
         n = int(val)
         return lambda: n
@@ -252,7 +251,7 @@ def main():
         run_file_mode(args.file, args.out_dir)
         return
 
-    # ── Modo generación / wordlist ────────────────────────────────────────
+    # Wordlist
     is_wordlist = args.mode.endswith('.txt') or (
         os.sep in args.mode or args.mode.startswith('./') or args.mode.startswith('../')
     )
@@ -260,7 +259,7 @@ def main():
     errors = []
     if args.prefix is None: errors.append("-s (prefijo) es obligatorio")
     if args.count  is None: errors.append("-c (cantidad) es obligatorio")
-    # -l solo es obligatorio en modo charset aleatorio
+    # -l is mandatory only in random charset mode
     if not is_wordlist and args.length is None:
         errors.append("-l (length) is mandatory in charset mode")
     if errors:
@@ -275,7 +274,7 @@ def main():
         print("Error: -c must be 0 (∞) or any other natural number (ℕ).", file=sys.stderr)
         sys.exit(1)
 
-    # ── Rama wordlist ─────────────────────────────────────────────────────
+    # Run wordlist mode
     if is_wordlist:
         words = load_wordlist(args.mode)
         run_wordlist_mode(
@@ -287,7 +286,7 @@ def main():
         )
         return
 
-    # ── Rama charset aleatorio ────────────────────────────────────────────
+    # Random charset
     try:
         length_fn = parse_length(args.length)
     except ValueError as e:
