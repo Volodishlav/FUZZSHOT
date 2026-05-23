@@ -8,6 +8,7 @@ import re
 from itertools import product
 from playwright.sync_api import sync_playwright
 
+
 def parse_length(val):
     val = val.strip()
 
@@ -37,7 +38,8 @@ def parse_length(val):
 
     return lambda: random.randint(lo, hi)
 
-MODOS = {
+
+MODES = {
     'alpha':       string.ascii_letters,
     'lower':       string.ascii_lowercase,
     'upper':       string.ascii_uppercase,
@@ -52,19 +54,21 @@ MODOS = {
     'urlsafe':     string.ascii_letters + string.digits + '-_',
 }
 
+
 def get_charset(mode):
-    if mode in MODOS:
-        return MODOS[mode]
+    if mode in MODES:
+        return MODES[mode]
     charset = ''
     for part in mode.split('+'):
-        if part in MODOS:
-            charset += MODOS[part]
+        if part in MODES:
+            charset += MODES[part]
         else:
             raise ValueError(
                 f"Error: Mode '{part}' not recognized.\n"
-                f"Available modes: {', '.join(MODOS.keys())}"
+                f"Available modes: {', '.join(MODES.keys())}"
             )
     return ''.join(sorted(set(charset)))
+
 
 def load_wordlist(filepath):
     if not os.path.isfile(filepath):
@@ -77,6 +81,7 @@ def load_wordlist(filepath):
         sys.exit(1)
     return words
 
+
 def screenshot(page, url, out_dir, filename):
     out_path = os.path.join(out_dir, filename)
     try:
@@ -87,6 +92,7 @@ def screenshot(page, url, out_dir, filename):
     except Exception as e:
         print(f"  ✗  {url}  —  {e}")
         return False
+
 
 def run_file_mode(filepath, out_dir):
     if not os.path.isfile(filepath):
@@ -116,6 +122,7 @@ def run_file_mode(filepath, out_dir):
         browser.close()
 
     print(f"\n✔  Finished. {len(urls)} processed URLs.")
+
 
 def run_wordlist_mode(prefix, suffix, words, count, out_dir):
     infinite = (count == 0)
@@ -159,6 +166,7 @@ def run_wordlist_mode(prefix, suffix, words, count, out_dir):
 
     print(f"\n✔  {done} words processed.")
 
+
 def run_gen_mode(prefix, suffix, length_fn, charset, count, out_dir):
     infinite = (count == 0)
     label    = "∞" if infinite else str(count)
@@ -192,6 +200,7 @@ def run_gen_mode(prefix, suffix, length_fn, charset, count, out_dir):
 
     print(f"\n✔  {i} processed combinations.")
 
+
 HELP_TEXT = """
 ─────────────────────────────────────────────────────────────────────────────────────
   -s PREFIX       Start of the URL (before the variable section)
@@ -223,6 +232,7 @@ HELP_TEXT = """
 ─────────────────────────────────────────────────────────────────────────────────────
 """
 
+
 def main():
     if '-h' in sys.argv or '--help' in sys.argv:
         print(HELP_TEXT)
@@ -246,7 +256,7 @@ def main():
                         ('-c', args.count)]
         used = [flag for flag, val in incompatible if val is not None]
         if used:
-            print(f"Error: -f no es compatible con: {', '.join(used)}", file=sys.stderr)
+            print(f"Error: -f is not compatible with: {', '.join(used)}", file=sys.stderr)
             sys.exit(1)
         run_file_mode(args.file, args.out_dir)
         return
@@ -257,11 +267,11 @@ def main():
     )
 
     errors = []
-    if args.prefix is None: errors.append("-s (prefijo) es obligatorio")
-    if args.count  is None: errors.append("-c (cantidad) es obligatorio")
-    # -l is mandatory only in random charset mode
+    if args.prefix is None: errors.append("-s (prefix) is required")
+    if args.count  is None: errors.append("-c (quantity) is required")
+    # -l is only required in random charset mode
     if not is_wordlist and args.length is None:
-        errors.append("-l (length) is mandatory in charset mode")
+        errors.append("-l (length) is required in charset mode")
     if errors:
         for e in errors:
             print(f"Error: {e}", file=sys.stderr)
@@ -307,6 +317,7 @@ def main():
         count     = args.count,
         out_dir   = args.out_dir,
     )
+
 
 if __name__ == '__main__':
     main()
