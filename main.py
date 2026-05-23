@@ -249,7 +249,7 @@ def main():
 
     args = parser.parse_args()
 
-    # ── Modo archivo ──────────────────────────────────────────────────────
+    # File mode
     if args.file:
         incompatible = [('-s', args.prefix), ('-e', args.suffix),
                         ('-l', args.length), ('-m', args.mode if args.mode != 'alnum' else None),
