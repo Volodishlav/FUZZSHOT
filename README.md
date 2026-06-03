@@ -73,5 +73,5 @@ python3 main.py -h
 ```
 
 ## Disclaimer
-
-This tool is intended for educational and research purposes only. The author is not responsible for any misuse, damage, or illegal activity caused by the use of this software. Users are solely responsible for ensuring compliance with applicable laws and regulations. The author is not responsible for any misuse, damage, or illegal activity caused by the use of this software.
+> [!WARNING]
+> This tool is intended for educational and research purposes only. The author is not responsible for any misuse, damage, or illegal activity caused by the use of this software. Users are solely responsible for ensuring compliance with applicable laws and regulations. The author is not responsible for any misuse, damage, or illegal activity caused by the use of this software.
